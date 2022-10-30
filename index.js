@@ -4,6 +4,7 @@ const port = 8000
 const puppeteer = require('puppeteer');
 const cors = require("cors");
 var fs = require('fs');
+const os = require("os");
 
 var corsOptions = {
     origin: ['https://chateleon.com', 'https://www.chateleon.com', 'http://localhost:3000'],
@@ -25,8 +26,8 @@ app.post('/generate', cors(corsOptions), async (req, res) => {
     const page = await browser.newPage();
     await page.goto(url);
     const epochTime = Date.now();
-    await page.screenshot({path: `/tmp/example-${epochTime}.png`});
-    var base64str = base64_encode(`/tmp/example-${epochTime}.png`);
+    await page.screenshot({path: `${os.tmpdir()}/example-${epochTime}.png`});
+    var base64str = base64_encode(`${os.tmpdir()}/example-${epochTime}.png`);
     res.json({
         screenshot: base64str
     });
