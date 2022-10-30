@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
-const port = 8000
-const puppeteer = require('puppeteer');
+const port = 8080
+const { chromium } = require("playwright");
 const cors = require("cors");
 var fs = require('fs');
 const os = require("os");
@@ -22,11 +22,14 @@ function base64_encode(file) {
 app.get("/", (req, res) => res.send("Service up and running"))
 app.post('/generate', cors(corsOptions), async (req, res) => {
     const url = req.query.url;
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+    let browser = await chromium.launch();
+ 
+    let page = await browser.newPage();
+    await page.setViewportSize({ width: 1280, height: 1080 });
     await page.goto(url);
     const epochTime = Date.now();
-    await page.screenshot({path: `${os.tmpdir()}/example-${epochTime}.png`});
+    await page.screenshot({ path: `${os.tmpdir()}/example-${epochTime}.png` });
+    await browser.close();
     var base64str = base64_encode(`${os.tmpdir()}/example-${epochTime}.png`);
     res.json({
         screenshot: base64str
