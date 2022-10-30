@@ -1,9 +1,16 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = 8000
 const puppeteer = require('puppeteer');
+const cors = require("cors");
 var fs = require('fs');
 
+var corsOptions = {
+    origin: ['https://chateleon.com', 'https://www.chateleon.com', 'http://localhost:3000'],
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }
+ 
+  
 function base64_encode(file) {
     // read binary data
     var bitmap = fs.readFileSync(file);
@@ -11,14 +18,15 @@ function base64_encode(file) {
     return new Buffer(bitmap).toString('base64');
 }
 
-
-app.get('/', async (req, res) => {
+app.get("/", (req, res) => res.send("Service up and running"))
+app.post('/generate', cors(corsOptions), async (req, res) => {
     const url = req.query.url;
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url);
-    await page.screenshot({path: 'example.png'});
-    var base64str = base64_encode('example.png');
+    const epochTime = Date.now();
+    await page.screenshot({path: `/tmp/example-${epochTime}.png`});
+    var base64str = base64_encode(`/tmp/example-${epochTime}.png`);
     res.json({
         screenshot: base64str
     });
