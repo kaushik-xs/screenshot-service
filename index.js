@@ -19,8 +19,10 @@ function base64_encode(file) {
   return new Buffer(bitmap).toString('base64');
 }
 
+app.use(cors())
+
 app.get("/", (req, res) => res.send("Service up and running"))
-app.post('/generate', cors(), async (req, res) => {
+app.post('/generate', async (req, res) => {
   const url = req.query.url;
   let browser = await puppeteer.launch({
     headless: true,
