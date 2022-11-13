@@ -1,15 +1,15 @@
 const express = require('express')
 const app = express()
 const port = 8080
-const { chromium } = require("playwright");
+const puppeteer = require("puppeteer");
 const cors = require("cors");
 var fs = require('fs');
 const os = require("os");
 
-var corsOptions = {
-    origin: ['https://chateleon.com', 'https://www.chateleon.com', 'http://localhost:3000'],
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-  }
+// var corsOptions = {
+//     origin: ['https://chateleon.com', 'https://www.chateleon.com', 'http://localhost:3000'],
+//     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+//   }
  
   
 function base64_encode(file) {
@@ -20,15 +20,16 @@ function base64_encode(file) {
 }
 
 app.get("/", (req, res) => res.send("Service up and running"))
-app.post('/generate', cors(corsOptions), async (req, res) => {
+app.post('/generate', cors(), async (req, res) => {
     const url = req.query.url;
-    let browser = await chromium.launch();
+    let browser = await puppeteer.launch();
  
     let page = await browser.newPage();
-    await page.setViewportSize({ width: 1280, height: 1080 });
+    // await page.setViewportSize({ width: 1280, height: 1080 });
     await page.goto(url);
     const epochTime = Date.now();
     await page.screenshot({ path: `${os.tmpdir()}/example-${epochTime}.png` });
+    await page.close();
     await browser.close();
     var base64str = base64_encode(`${os.tmpdir()}/example-${epochTime}.png`);
     res.json({
